@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model article {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title      String   @db.VarChar(255)
+  content    String
+  company_id String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  company    company  @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model company {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  image       String?   @db.VarChar(255)
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime  @default(now()) @db.Timestamp(6)
+  user_id     String    @db.Uuid
+  tenant_id   String    @db.VarChar(255)
+  article     article[]
+  user        user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  garden      garden[]
+  video       video[]
+}
+
+model garden {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  size         Int
+  soil_type    String   @db.VarChar(50)
+  sun_exposure String   @db.VarChar(50)
+  company_id   String   @db.Uuid
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  updated_at   DateTime @default(now()) @db.Timestamp(6)
+  company      company  @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plant        plant[]
+}
+
+model plant {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String   @db.VarChar(255)
+  planting_date   DateTime @db.Date
+  fertilizer_type String?  @db.VarChar(50)
+  water_amount    Int?
+  garden_id       String   @db.Uuid
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
+  garden          garden   @relation(fields: [garden_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model question {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content    String
+  answer     String?
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  user       user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email       String     @unique @db.VarChar(255)
+  firstName   String?    @db.VarChar(255)
+  lastName    String?    @db.VarChar(255)
+  roq_user_id String     @db.VarChar(255)
+  tenant_id   String     @db.VarChar(255)
+  created_at  DateTime   @default(now()) @db.Timestamp(6)
+  updated_at  DateTime   @default(now()) @db.Timestamp(6)
+  company     company[]
+  question    question[]
+}
+
+model video {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title      String   @db.VarChar(255)
+  url        String   @db.VarChar(255)
+  company_id String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  company    company  @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
